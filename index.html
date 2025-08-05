@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OD</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      height: 100vh;
+      background-color: white;
+      cursor: none;
+      font-family: "Arial Narrow", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .cursor {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+    }
+
+    .cursor .symbol-triangle {
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-bottom: 10px solid black;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .cursor .symbol-square {
+      width: 20px;
+      height: 20px;
+      background-color: black;
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .page-title-symbol {
+      position: relative;
+      transform: rotate(90deg);
+      margin-bottom: 40px;
+      width: 60px;
+      height: 60px;
+      cursor: pointer;
+    }
+
+    .page-title-symbol .symbol-triangle {
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 20px solid black;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .page-title-symbol .symbol-square {
+      width: 40px;
+      height: 40px;
+      background-color: black;
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      justify-items: center;
+      align-items: center;
+      max-width: 80vw;
+    }
+
+    .gallery-item {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      overflow: hidden;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      transform: scale(1);
+    }
+
+    .mask {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.6s ease, opacity 0.6s ease;
+      z-index: 2;
+    }
+
+    .mask .symbol {
+      position: relative;
+      width: 20px;
+      height: 20px;
+    }
+
+    .mask .symbol .symbol-triangle {
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-bottom: 10px solid black;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .mask .symbol .symbol-square {
+      width: 20px;
+      height: 20px;
+      background-color: black;
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .gallery-item:hover .mask {
+      transform: scaleY(0);
+      opacity: 0;
+    }
+
+    .gallery-item:hover img {
+      transform: scale(1.05);
+    }
+
+    .gallery-item.last-centered {
+      grid-column: 2 / 3;
+      justify-self: center;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 999;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border: 2px solid black;
+      padding: 20px;
+      z-index: 1000;
+      text-align: center;
+    }
+
+    .modal h2 {
+      margin-bottom: 10px;
+    }
+
+    .modal button {
+      margin-top: 10px;
+      padding: 5px 15px;
+      background: black;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Custom Cursor -->
+  <div class="cursor" id="customCursor">
+    <div class="symbol-triangle"></div>
+    <div class="symbol-square"></div>
+  </div>
+
+  <!-- Title Symbol -->
+  <div class="page-title-symbol" id="titleSymbol">
+    <div class="symbol-triangle"></div>
+    <div class="symbol-square"></div>
+  </div>
+
+  <!-- Image Gallery -->
+  <div class="gallery" id="gallery"></div>
+
+  <!-- Contact Modal -->
+  <div class="modal-overlay" id="modalOverlay"></div>
+  <div class="modal" id="contactModal">
+    <h2>Contact</h2>
+    <p>Email: contact@odproject.com</p>
+    <p>Phone: +40 123 456 789</p>
+    <button onclick="closeModal()">Close</button>
+  </div>
+
+  <script>
+    const cursor = document.querySelector('.cursor');
+    const triangle = cursor.querySelector('.symbol-triangle');
+    const square = cursor.querySelector('.symbol-square');
+
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = `${e.clientX}px`;
+      cursor.style.top = `${e.clientY}px`;
+    });
+
+    const gallery = document.getElementById('gallery');
+    const imageSources = [
+      'image1.jpg', 'image2.jpg', 'image3.jpg', 'image4.jpg', 'image5.jpg',
+      'image6.jpg', 'image7.jpg', 'image8.jpg', 'image9.jpg', 'image10.jpg'
+    ];
+
+    function shuffleArray(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    const shuffledImages = shuffleArray(imageSources);
+
+    shuffledImages.forEach((src, i) => {
+      const item = document.createElement('div');
+      item.className = 'gallery-item';
+
+      // Center last image if not full row
+      if ((i === 9) && shuffledImages.length % 3 !== 0) {
+        item.classList.add('last-centered');
+      }
+
+      item.innerHTML = `
+        <img src="${src}" alt="Image ${i + 1}">
+        <div class="mask">
+          <div class="symbol">
+            <div class="symbol-triangle"></div>
+            <div class="symbol-square"></div>
+          </div>
+        </div>
+      `;
+
+      item.addEventListener('mouseenter', () => {
+        triangle.style.borderBottomColor = 'red';
+        square.style.backgroundColor = 'red';
+      });
+
+      item.addEventListener('mouseleave', () => {
+        triangle.style.borderBottomColor = 'black';
+        square.style.backgroundColor = 'black';
+      });
+
+      gallery.appendChild(item);
+    });
+
+    // Modal logic
+    const modal = document.getElementById("contactModal");
+    const overlay = document.getElementById("modalOverlay");
+    const titleSymbol = document.getElementById("titleSymbol");
+
+    titleSymbol.addEventListener('click', () => {
+      modal.style.display = "block";
+      overlay.style.display = "block";
+    });
+
+    function closeModal() {
+      modal.style.display = "none";
+      overlay.style.display = "none";
+    }
+  </script>
+
+</body>
+</html>
