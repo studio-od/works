@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>OD</title>
   <style>
     * {
@@ -15,7 +15,7 @@
       height: 100vh;
       background-color: white;
       cursor: none;
-      font-family: "Arial Narrow", sans-serif;
+      font-family: "Swiss LT Cn BT", sans-serif, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -24,19 +24,20 @@
 
     .cursor {
       position: fixed;
-      width: 40px;
-      height: 40px;
+      width: 30px;
+      height: 30px;
       pointer-events: none;
       transform: translate(-50%, -50%);
-      z-index: 1000;
+      z-index: 10000;
+      mix-blend-mode: difference;
     }
 
     .cursor .symbol-triangle {
       width: 0;
       height: 0;
-      border-left: 10px solid transparent;
-      border-right: 10px solid transparent;
-      border-bottom: 10px solid black;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-bottom: 13.86px solid white;
       position: absolute;
       top: 0;
       left: 50%;
@@ -44,11 +45,11 @@
     }
 
     .cursor .symbol-square {
-      width: 20px;
-      height: 20px;
-      background-color: black;
+      width: 16px;
+      height: 16px;
+      background-color: white;
       position: absolute;
-      top: 10px;
+      top: 13.86px;
       left: 50%;
       transform: translateX(-50%);
     }
@@ -57,21 +58,20 @@
       position: relative;
       transform: rotate(90deg);
       margin-bottom: 40px;
-      width: 60px;
-      height: 60px;
-      cursor: pointer;
+      width: 80px;
+      height: 80px;
+      user-select: none;
     }
 
     .page-title-symbol .symbol-triangle {
-      width: 0;
-      height: 0;
       border-left: 20px solid transparent;
       border-right: 20px solid transparent;
-      border-bottom: 20px solid black;
+      border-bottom: 34.64px solid black;
       position: absolute;
       top: 0;
       left: 50%;
       transform: translateX(-50%);
+      transition: border-bottom-color 0.3s;
     }
 
     .page-title-symbol .symbol-square {
@@ -79,9 +79,18 @@
       height: 40px;
       background-color: black;
       position: absolute;
-      top: 20px;
+      top: 34.64px;
       left: 50%;
       transform: translateX(-50%);
+      transition: background-color 0.3s;
+    }
+
+    .page-title-symbol:hover .symbol-triangle {
+      border-bottom-color: red;
+    }
+
+    .page-title-symbol:hover .symbol-square {
+      background-color: red;
     }
 
     .gallery {
@@ -98,6 +107,7 @@
       width: 150px;
       height: 150px;
       overflow: hidden;
+      
     }
 
     .gallery-item img {
@@ -106,6 +116,7 @@
       object-fit: cover;
       transition: opacity 0.6s ease, transform 0.6s ease;
       transform: scale(1);
+      display: block;
     }
 
     .mask {
@@ -123,15 +134,7 @@
       z-index: 2;
     }
 
-    .mask .symbol {
-      position: relative;
-      width: 20px;
-      height: 20px;
-    }
-
     .mask .symbol .symbol-triangle {
-      width: 0;
-      height: 0;
       border-left: 10px solid transparent;
       border-right: 10px solid transparent;
       border-bottom: 10px solid black;
@@ -165,7 +168,7 @@
       justify-self: center;
     }
 
-    /* Modal */
+    /* Contact Modal and Overlay */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -175,92 +178,266 @@
       z-index: 999;
     }
 
+    .modal-overlay.active {
+      display: block;
+    }
+
     .modal {
       display: none;
       position: fixed;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%);
-      background: white;
+      transform: translate(-50%, -50%) scale(0.8);
+      background: #fafafa;
       border: 2px solid black;
-      padding: 20px;
+      padding: 25px 30px;
       z-index: 1000;
       text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      border-radius: 8px;
+      font-size: 16px;
+      color: #222;
+      font-weight: 400;
+      line-height: 1.5;
+      transition: transform 0.4s ease, opacity 0.4s ease;
+      max-width: 320px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      user-select: none;
     }
 
-    .modal h2 {
-      margin-bottom: 10px;
+    .modal.show {
+      display: block;
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+      pointer-events: auto;
     }
 
-    .modal button {
-      margin-top: 10px;
-      padding: 5px 15px;
-      background: black;
-      color: white;
-      border: none;
-      cursor: pointer;
+    #contactModal h2 {
+      font-weight: 700;
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #000;
+    }
+
+    #contactModal p {
+      margin-bottom: 15px;
+    }
+
+    #contactModal a {
+      color: #0077cc;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    #contactModal a:hover {
+      color: #005fa3;
+      text-decoration: underline;
+    }
+
+    #contactModal button {
+      margin-top: 20px;
+      padding: 8px 22px;
+      font-weight: 600;
+      border-radius: 5px;
+      border: 1.5px solid #000;
+      background-color: transparent;
+      
+      font-size: 15px;
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+
+    #contactModal button:hover {
+      background-color: #000;
+      color: #fff;
+      border-color: #000;
+    }
+
+    /* Image Zoom Modal */
+    #imageModal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      background: white;
+      padding: 20px 25px;
+      border-radius: 10px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      z-index: 1500;
+      opacity: 0;
+      pointer-events: none;
+      max-width: 90vw;
+      max-height: 90vh;
+      overflow: auto;
+      text-align: center;
+      transition: transform 0.4s ease, opacity 0.4s ease;
+    }
+
+    #imageModal.show {
+      display: block;
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+      pointer-events: auto;
+    }
+
+    #imageModal img {
+      max-width: 100%;
+      max-height: 60vh;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      user-select: none;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    #imageModal .description {
+      font-size: 16px;
+      font-weight: 400;
+      color: #333;
+      line-height: 1.4;
+      margin-bottom: 20px;
+      user-select: text;
+    }
+
+    #imageModal button.close-btn {
+      padding: 8px 24px;
+      font-weight: 600;
+      border-radius: 5px;
+      border: 1.5px solid #000;
+      background-color: transparent;
+      
+      font-size: 15px;
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+
+    #imageModal button.close-btn:hover {
+      background-color: #000;
+      color: #fff;
+      border-color: #000;
     }
   </style>
 </head>
 <body>
 
-  <!-- Custom Cursor -->
   <div class="cursor" id="customCursor">
     <div class="symbol-triangle"></div>
     <div class="symbol-square"></div>
   </div>
 
-  <!-- Title Symbol -->
-  <div class="page-title-symbol" id="titleSymbol">
+  <div class="page-title-symbol" id="titleSymbol" title="Contact Info" tabindex="0" aria-label="Open contact information">
     <div class="symbol-triangle"></div>
     <div class="symbol-square"></div>
   </div>
 
-  <!-- Image Gallery -->
   <div class="gallery" id="gallery"></div>
 
   <!-- Contact Modal -->
   <div class="modal-overlay" id="modalOverlay"></div>
-  <div class="modal" id="contactModal">
-    <h2>Contact</h2>
-    <p>Email: contact@odproject.com</p>
-    <p>Phone: +40 123 456 789</p>
-    <button onclick="closeModal()">Close</button>
+  <div class="modal" id="contactModal" role="dialog" aria-modal="true" aria-labelledby="contactTitle" aria-describedby="contactDesc">
+    <h2 id="contactTitle">Contact</h2>
+    <p id="contactDesc">
+      Email: <a href="mailto:contact@odproject.com">contact@odproject.com</a><br/>
+      Phone: <a href="tel:+40123456789">+40 123 456 789</a>
+    </p>
+    <p>
+      Follow us on: 
+      <a href="https://www.youtube.com/channel/UCWqYW-CYphREaIBe8UY9VDg" target="_blank" rel="noopener">YouTube</a> |
+      <a href="https://www.instagram.com/od.arh/" target="_blank" rel="noopener">Instagram</a>
+    </p>
+    <button onclick="closeModal()" aria-label="Close Contact Modal">Close</button>
+  </div>
+
+  <!-- Image Zoom Modal -->
+  <div class="modal-overlay" id="imageModalOverlay" style="display:none;"></div>
+  <div id="imageModal" role="dialog" aria-modal="true" aria-labelledby="imageModalTitle" aria-describedby="imageModalDesc" tabindex="-1">
+    <img src="" alt="" id="zoomedImage" />
+    <div class="description" id="imageModalDesc"></div>
+    <button class="close-btn" aria-label="Close Image Modal">Close</button>
   </div>
 
   <script>
-    const cursor = document.querySelector('.cursor');
-    const triangle = cursor.querySelector('.symbol-triangle');
-    const square = cursor.querySelector('.symbol-square');
-
-    document.addEventListener('mousemove', (e) => {
+    // Custom cursor
+    const cursor = document.getElementById("customCursor");
+    document.addEventListener("mousemove", (e) => {
       cursor.style.left = `${e.clientX}px`;
       cursor.style.top = `${e.clientY}px`;
     });
 
-    const gallery = document.getElementById('gallery');
-    const imageSources = [
-      'image1.jpg', 'image2.jpg', 'image3.jpg', 'image4.jpg', 'image5.jpg',
-      'image6.jpg', 'image7.jpg', 'image8.jpg', 'image9.jpg', 'image10.jpg'
-    ];
+    // Contact modal open/close
+    const titleSymbol = document.getElementById("titleSymbol");
+    const contactModal = document.getElementById("contactModal");
+    const modalOverlay = document.getElementById("modalOverlay");
 
-    function shuffleArray(array) {
-      return array.sort(() => Math.random() - 0.5);
+    function openModal() {
+      contactModal.classList.add("show");
+      modalOverlay.classList.add("active");
+      contactModal.focus();
     }
 
-    const shuffledImages = shuffleArray(imageSources);
+    function closeModal() {
+      contactModal.classList.remove("show");
+      modalOverlay.classList.remove("active");
+    }
 
-    shuffledImages.forEach((src, i) => {
+    titleSymbol.addEventListener("click", openModal);
+    modalOverlay.addEventListener("click", closeModal);
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        if (contactModal.classList.contains("show")) {
+          closeModal();
+        }
+        if (imageModal.classList.contains("show")) {
+          closeImageModal();
+        }
+      }
+    });
+
+    // Gallery data
+    const imageSources = [
+      "image1.jpg", "image2.jpg", "image3.jpg", "image4.jpg", "image5.jpg",
+      "image6.jpg", "image7.jpg", "image8.jpg", "image9.jpg", "image10.jpg"
+    ];
+
+    const imageDescriptions = [
+      "Minimal abstract shape with soft pastel tones.",
+      "Dark triangular landscape under moonlight.",
+      "Soft-toned blend of colors evoking calm.",
+      "High-contrast detailed artwork in black and white.",
+      "Conceptual form study featuring layered geometry.",
+      "Subtle geometry patterns in muted shades.",
+      "Depth-focused pattern with multi-layered textures.",
+      "Dynamic color tension in a vibrant composition.",
+      "Hazy emotional sketch with impressionistic style.",
+      "Structured gridwork emphasizing balance and order."
+    ];
+
+    // Shuffle function
+    function shuffleArray(array) {
+      let currentIndex = array.length, randomIndex;
+      const newArray = array.slice();
+      while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [newArray[currentIndex], newArray[randomIndex]] = [newArray[randomIndex], newArray[currentIndex]];
+      }
+      return newArray;
+    }
+
+    const paired = imageSources.map((src, i) => ({src, desc: imageDescriptions[i]}));
+    const shuffledPaired = shuffleArray(paired);
+
+    const gallery = document.getElementById("gallery");
+
+    shuffledPaired.forEach(({src, desc}, i) => {
       const item = document.createElement('div');
       item.className = 'gallery-item';
-
-      // Center last image if not full row
-      if ((i === 9) && shuffledImages.length % 3 !== 0) {
+      if ((i === shuffledPaired.length - 1) && shuffledPaired.length % 3 !== 0) {
         item.classList.add('last-centered');
       }
 
       item.innerHTML = `
-        <img src="${src}" alt="Image ${i + 1}">
+        <img src="${src}" alt="Gallery image ${i + 1}" tabindex="0" />
         <div class="mask">
           <div class="symbol">
             <div class="symbol-triangle"></div>
@@ -269,34 +446,50 @@
         </div>
       `;
 
-      item.addEventListener('mouseenter', () => {
-        triangle.style.borderBottomColor = 'red';
-        square.style.backgroundColor = 'red';
+      // Click handler to open image zoom modal
+      item.querySelector('img').addEventListener('click', () => {
+        openImageModal(src, desc, i+1);
       });
 
-      item.addEventListener('mouseleave', () => {
-        triangle.style.borderBottomColor = 'black';
-        square.style.backgroundColor = 'black';
+      // Also allow keyboard enter to open modal for accessibility
+      item.querySelector('img').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openImageModal(src, desc, i+1);
+        }
       });
 
       gallery.appendChild(item);
     });
 
-    // Modal logic
-    const modal = document.getElementById("contactModal");
-    const overlay = document.getElementById("modalOverlay");
-    const titleSymbol = document.getElementById("titleSymbol");
+    // Image Zoom Modal controls
+    const imageModal = document.getElementById("imageModal");
+    const imageModalOverlay = document.getElementById("imageModalOverlay");
+    const zoomedImage = document.getElementById("zoomedImage");
+    const imageModalDesc = document.getElementById("imageModalDesc");
+    const imageModalTitle = document.getElementById("imageModalTitle");
 
-    titleSymbol.addEventListener('click', () => {
-      modal.style.display = "block";
-      overlay.style.display = "block";
-    });
-
-    function closeModal() {
-      modal.style.display = "none";
-      overlay.style.display = "none";
+    function openImageModal(src, desc, index) {
+      zoomedImage.src = src;
+      zoomedImage.alt = `Gallery image ${index}`;
+      imageModalDesc.textContent = desc;
+      imageModal.classList.add("show");
+      imageModalOverlay.style.display = "block";
+      imageModal.focus();
     }
+
+    function closeImageModal() {
+      imageModal.classList.remove("show");
+      imageModalOverlay.style.display = "none";
+      zoomedImage.src = "";
+      zoomedImage.alt = "";
+      imageModalDesc.textContent = "";
+    }
+
+    imageModalOverlay.addEventListener("click", closeImageModal);
+
+    imageModal.querySelector("button.close-btn").addEventListener("click", closeImageModal);
   </script>
 
 </body>
-</html>
+</html>  
